@@ -44,7 +44,7 @@ def process_history_df(df):
     df.loc[mask_empty_domain, 'domain'] = df.loc[mask_empty_domain, 'url'].apply(extract_domain)
     
     # Remove 'www.' for cleaner aggregation
-    df['domain'] = df['domain'].str.replace('^www\.', '', regex=True)
+    df['domain'] = df['domain'].str.replace(r'^www\.', '', regex=True)
 
     # 3. Add features
     df['date'] = df['dt'].dt.date
