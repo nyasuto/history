@@ -151,6 +151,44 @@ def main():
         height=500,
     )
 
+    # --- Domain Analysis ---
+    st.divider()
+    st.header("Domain Analysis")
+
+    # Domain Selector (sorted by visit count desc)
+    top_domains = filtered_df["domain"].value_counts().index.tolist()
+    if top_domains:
+        selected_domain = st.selectbox("Select Domain to Analyze", top_domains)
+
+        if selected_domain:
+            domain_df = filtered_df[filtered_df["domain"] == selected_domain]
+
+            st.subheader(f"Analytics for {selected_domain}")
+
+            d_col1, d_col2 = st.columns(2)
+            d_col1.metric("Visits", len(domain_df))
+            d_col2.metric("Unique Pages", domain_df["url"].nunique())
+
+            # Top Pages
+            st.markdown("#### Top Pages")
+            page_counts = (
+                domain_df.groupby(["title", "url"]).size().reset_index(name="count")
+            )
+            page_counts = page_counts.sort_values("count", ascending=False).head(20)
+
+            st.dataframe(
+                page_counts,
+                width="stretch",
+                column_config={
+                    "url": st.column_config.LinkColumn("URL"),
+                    "count": st.column_config.NumberColumn("Visits", format="%d"),
+                },
+                hide_index=True,
+            )
+    else:
+        st.info("No domains available for analysis.")
+
+
 
 if __name__ == "__main__":
     main()

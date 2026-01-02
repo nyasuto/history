@@ -53,7 +53,7 @@ def process_history_df(df, ignore_set=None):
 
     # 3. Filter Ignore List
     if ignore_set:
-        df = df[~df["domain"].isin(ignore_set)]
+        df = df[~df["domain"].isin(ignore_set)].copy()
 
     # 4. Add features
     df["date"] = df["dt"].dt.date
