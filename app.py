@@ -2,43 +2,67 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from src import db, etl
+from src import db, etl, config
 
-st.set_page_config(page_title="Safari History Analytics", page_icon="🧭", layout="wide")
+st.set_page_config(
+    page_title="Safari History Analytics",
+    page_icon="🧭",
+    layout="wide"
+)
 
 # Initialize Session State
-if "data_loaded" not in st.session_state:
-    st.session_state["data_loaded"] = False
-
+if 'data_loaded' not in st.session_state:
+    st.session_state['data_loaded'] = False
 
 @st.cache_data(ttl=600)
-def load_data():
+def load_data(ignore_set=None):
     """Loads and processes data from Safari History DB."""
     try:
         conn = db.get_connection()
         raw_df = db.fetch_history_data(conn)
         conn.close()
-        df = etl.process_history_df(raw_df)
+        df = etl.process_history_df(raw_df, ignore_set)
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
-        st.info(
-            "Ensure the terminal has 'Full Disk Access' in macOS System Settings to read Safari History."
-        )
+        st.info("Ensure the terminal has 'Full Disk Access' in macOS System Settings to read Safari History.")
         return pd.DataFrame()
-
 
 def main():
     st.title("🧭 Safari History Analytics")
+    
+    # Load Ignore List
+    ignore_set = config.load_ignore_list()
 
     with st.sidebar:
         st.header("Filters")
         if st.button("Reload Data"):
             st.cache_data.clear()
             st.rerun()
+            
+        st.divider()
+        st.header("Ignore List")
+        
+        # Add Domain
+        new_domain = st.text_input("Add Domain to Ignore").strip()
+        if st.button("Add"):
+            if new_domain:
+                config.add_domain(new_domain)
+                st.cache_data.clear()
+                st.rerun()
+
+        # Remove Domain
+        if ignore_set:
+            domain_to_remove = st.selectbox("Remove Domain", sorted(list(ignore_set)))
+            if st.button("Remove"):
+                config.remove_domain(domain_to_remove)
+                st.cache_data.clear()
+                st.rerun()
+        else:
+            st.info("No domains in ignore list.")
 
     # Load Data
-    df = load_data()
+    df = load_data(ignore_set)
 
     if df.empty:
         st.warning("No data found or permission denied.")
