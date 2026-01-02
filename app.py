@@ -83,7 +83,7 @@ def main():
             y=alt.Y('domain', sort='-x', title='Domain'),
             tooltip=['domain', 'count']
         ).properties(height=400)
-        st.altair_chart(chart, use_container_width=True)
+        st.altair_chart(chart, width="stretch")
 
     with col_chart2:
         st.subheader("Activity by Hour")
@@ -94,7 +94,7 @@ def main():
             y=alt.Y('count', title='Visits'),
             tooltip=['hour', 'count']
         ).properties(height=400)
-        st.altair_chart(chart_hour, use_container_width=True)
+        st.altair_chart(chart_hour, width="stretch")
 
     # --- Raw Data ---
     st.divider()
@@ -110,7 +110,7 @@ def main():
         
     st.dataframe(
         display_df[['dt', 'title', 'domain', 'url']],
-        use_container_width=True,
+        width="stretch",
         column_config={
             "dt": st.column_config.DatetimeColumn("Time", format="YYYY-MM-DD HH:mm"),
             "url": st.column_config.LinkColumn("URL")
