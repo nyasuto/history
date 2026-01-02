@@ -22,6 +22,7 @@
 - **CI/CD**:
     - GitHub Actionsにより、PR作成時に自動でLintとFormatチェックが実行される。
     - マージするにはCIがすべてPassしている必要がある。
+    - **ルール**: コミット/Push前には必ずローカルで `make quality` を実行し、エラーがないことを確認する。
 
 - Issue/PRは日本語で記載する
 - mainブランチに戻ったらgit pullしてmainを最新化する
