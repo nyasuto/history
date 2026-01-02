@@ -1,9 +1,10 @@
-import sqlite3
 import os
+import sqlite3
+
 import pandas as pd
-from datetime import datetime
 
 SAFARI_HISTORY_PATH = os.path.expanduser("~/Library/Safari/History.db")
+
 
 def get_connection():
     """
@@ -24,6 +25,7 @@ def get_connection():
     except sqlite3.Error as e:
         raise RuntimeError(f"Failed to connect to database: {e}")
 
+
 def fetch_history_data(conn):
     """
     Fetches raw history data joined with visits.
@@ -43,7 +45,7 @@ def fetch_history_data(conn):
     ORDER BY
         history_visits.visit_time DESC
     """
-    
+
     try:
         df = pd.read_sql_query(query, conn)
         return df
