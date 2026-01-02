@@ -189,6 +189,5 @@ def main():
         st.info("No domains available for analysis.")
 
 
-
 if __name__ == "__main__":
     main()
