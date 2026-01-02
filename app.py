@@ -12,13 +12,13 @@ if "data_loaded" not in st.session_state:
 
 
 @st.cache_data(ttl=600)
-def load_data(ignore_set=None):
+def load_data(ignore_set=None, ignore_titles=None):
     """Loads and processes data from Safari History DB."""
     try:
         conn = db.get_connection()
         raw_df = db.fetch_history_data(conn)
         conn.close()
-        df = etl.process_history_df(raw_df, ignore_set)
+        df = etl.process_history_df(raw_df, ignore_set, ignore_titles)
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -33,6 +33,7 @@ def main():
 
     # Load Ignore List
     ignore_set = config.load_ignore_list()
+    ignore_titles = config.load_ignore_titles()
 
     with st.sidebar:
         st.header("Filters")
@@ -41,28 +42,55 @@ def main():
             st.rerun()
 
         st.divider()
-        st.header("Ignore List")
+        st.header("Ignore Management")
 
-        # Add Domain
-        new_domain = st.text_input("Add Domain to Ignore").strip()
-        if st.button("Add"):
-            if new_domain:
-                config.add_domain(new_domain)
-                st.cache_data.clear()
-                st.rerun()
+        tab1, tab2 = st.tabs(["Domains", "Titles"])
 
-        # Remove Domain
-        if ignore_set:
-            domain_to_remove = st.selectbox("Remove Domain", sorted(list(ignore_set)))
-            if st.button("Remove"):
-                config.remove_domain(domain_to_remove)
-                st.cache_data.clear()
-                st.rerun()
-        else:
-            st.info("No domains in ignore list.")
+        with tab1:
+            # Add Domain
+            new_domain = st.text_input("Add Domain to Ignore", key="add_domain").strip()
+            if st.button("Add Domain"):
+                if new_domain:
+                    config.add_domain(new_domain)
+                    st.cache_data.clear()
+                    st.rerun()
+
+            # Remove Domain
+            if ignore_set:
+                domain_to_remove = st.selectbox(
+                    "Remove Domain", sorted(list(ignore_set)), key="remove_domain"
+                )
+                if st.button("Remove Domain"):
+                    config.remove_domain(domain_to_remove)
+                    st.cache_data.clear()
+                    st.rerun()
+            else:
+                st.info("No domains in ignore list.")
+
+        with tab2:
+            st.caption("Exclude pages containing these keywords in title.")
+            # Add Title Keyword
+            new_title = st.text_input("Add Title Keyword", key="add_title").strip()
+            if st.button("Add Keyword"):
+                if new_title:
+                    config.add_ignore_title(new_title)
+                    st.cache_data.clear()
+                    st.rerun()
+
+            # Remove Title Keyword
+            if ignore_titles:
+                title_to_remove = st.selectbox(
+                    "Remove Keyword", sorted(ignore_titles), key="remove_title"
+                )
+                if st.button("Remove Keyword"):
+                    config.remove_ignore_title(title_to_remove)
+                    st.cache_data.clear()
+                    st.rerun()
+            else:
+                st.info("No title keywords in ignore list.")
 
     # Load Data
-    df = load_data(ignore_set)
+    df = load_data(ignore_set, ignore_titles)
 
     if df.empty:
         st.warning("No data found or permission denied.")

@@ -19,13 +19,15 @@ def extract_domain(url):
         return ""
 
 
-def process_history_df(df, ignore_set=None):
+def process_history_df(df, ignore_set=None, ignore_titles=None):
     """
     Transforms the raw DataFrame:
     1. Converts timestamps.
     2. Fills missing domains or extracts them from URL.
     3. Adds time-based features (Hour, Date, etc.)
     4. Filters out ignored domains.
+    5. Cleans URLs (removes parameters).
+    6. Filters out empty titles and ignored title keywords.
     """
     if df.empty:
         return df
@@ -51,11 +53,25 @@ def process_history_df(df, ignore_set=None):
     # Remove 'www.' for cleaner aggregation
     df["domain"] = df["domain"].str.replace(r"^www\.", "", regex=True)
 
-    # 3. Filter Ignore List
+    # 3. Filter Ignore List (Domain)
     if ignore_set:
-        df = df[~df["domain"].isin(ignore_set)].copy()
+        df = df[~df["domain"].isin(ignore_set)]
 
-    # 4. Add features
+    # 4. Clean URL (Remove parameters)
+    df["url"] = df["url"].str.split("?").str[0]
+
+    # 5. Filter Titles
+    # Remove empty titles
+    df = df[df["title"].notna() & (df["title"] != "")].copy()
+
+    # Remove ignored title keywords
+    if ignore_titles:
+        # Constructing a regex from user input is dangerous if not escaped.
+        # For now, let's use simple string containment check loop for safety and clarity in this version.
+        for keyword in ignore_titles:
+            df = df[~df["title"].str.contains(keyword, case=False, regex=False)]
+
+    # 6. Add features
     df["date"] = df["dt"].dt.date
     df["hour"] = df["dt"].dt.hour
     df["day_of_week"] = df["dt"].dt.day_name()
