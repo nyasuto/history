@@ -24,11 +24,12 @@
 - mainブランチに戻ったらgit pullしてmainを最新化する
 
 ## 3. 技術的ナレッジ
-
-
+- **uv**: 高速なPythonパッケージマネージャー。`pip`や`venv`の代わりに`uv sync`, `uv run`を使用する。
+- **Ruff**: 高速なリンター/フォーマッター。`make lint` / `make format` で実行。
+- **Streamlit**: WebUIフレームワーク。
 
 ## 4. プロジェクト構成
-- **Python環境**: `venv` + `requirements.txt` を基本とする。
+- **Python環境**: `uv` + `pyproject.toml` を基本とする。
 - **ディレクトリ構造**:
     - `app.py`: UIエントリポイント
     - `src/`: ビジネスロジック、DBアクセス層
