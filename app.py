@@ -2,17 +2,14 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
-from src import db, etl, config
+from src import config, db, etl
 
-st.set_page_config(
-    page_title="Safari History Analytics",
-    page_icon="🧭",
-    layout="wide"
-)
+st.set_page_config(page_title="Safari History Analytics", page_icon="🧭", layout="wide")
 
 # Initialize Session State
-if 'data_loaded' not in st.session_state:
-    st.session_state['data_loaded'] = False
+if "data_loaded" not in st.session_state:
+    st.session_state["data_loaded"] = False
+
 
 @st.cache_data(ttl=600)
 def load_data(ignore_set=None):
@@ -25,12 +22,15 @@ def load_data(ignore_set=None):
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
-        st.info("Ensure the terminal has 'Full Disk Access' in macOS System Settings to read Safari History.")
+        st.info(
+            "Ensure the terminal has 'Full Disk Access' in macOS System Settings to read Safari History."
+        )
         return pd.DataFrame()
+
 
 def main():
     st.title("🧭 Safari History Analytics")
-    
+
     # Load Ignore List
     ignore_set = config.load_ignore_list()
 
@@ -39,10 +39,10 @@ def main():
         if st.button("Reload Data"):
             st.cache_data.clear()
             st.rerun()
-            
+
         st.divider()
         st.header("Ignore List")
-        
+
         # Add Domain
         new_domain = st.text_input("Add Domain to Ignore").strip()
         if st.button("Add"):
