@@ -19,12 +19,13 @@ def extract_domain(url):
         return ""
 
 
-def process_history_df(df):
+def process_history_df(df, ignore_set=None):
     """
     Transforms the raw DataFrame:
     1. Converts timestamps.
     2. Fills missing domains or extracts them from URL.
     3. Adds time-based features (Hour, Date, etc.)
+    4. Filters out ignored domains.
     """
     if df.empty:
         return df
@@ -50,7 +51,11 @@ def process_history_df(df):
     # Remove 'www.' for cleaner aggregation
     df["domain"] = df["domain"].str.replace(r"^www\.", "", regex=True)
 
-    # 3. Add features
+    # 3. Filter Ignore List
+    if ignore_set:
+        df = df[~df["domain"].isin(ignore_set)]
+
+    # 4. Add features
     df["date"] = df["dt"].dt.date
     df["hour"] = df["dt"].dt.hour
     df["day_of_week"] = df["dt"].dt.day_name()
